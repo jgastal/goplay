@@ -3,6 +3,16 @@
 	"GoVersion": "go1.2.2",
 	"Deps": [
 		{
+			"ImportPath": "code.google.com/p/go.crypto/bcrypt",
+			"Comment": "null-209",
+			"Rev": "23b39e4e860172e1983ded00a9d2f7e42b7683d0"
+		},
+		{
+			"ImportPath": "code.google.com/p/go.crypto/blowfish",
+			"Comment": "null-209",
+			"Rev": "23b39e4e860172e1983ded00a9d2f7e42b7683d0"
+		},
+		{
 			"ImportPath": "github.com/gorilla/context",
 			"Rev": "1be7a086a5fd6440ef16fe96baeda0c78282b980"
 		},
