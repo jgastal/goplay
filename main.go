@@ -7,6 +7,10 @@ import (
 	"os"
 )
 
+func internal_error(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "static/html/internal-error.html")
+}
+
 func login_get(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "static/html/login.html")
 }
