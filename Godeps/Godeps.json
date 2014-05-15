@@ -1,0 +1,26 @@
+{
+	"ImportPath": "goplay",
+	"GoVersion": "go1.2.2",
+	"Deps": [
+		{
+			"ImportPath": "github.com/gorilla/context",
+			"Rev": "1be7a086a5fd6440ef16fe96baeda0c78282b980"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Rev": "136d54f81f00414c45c3c68dd47e98cc97519c5e"
+		},
+		{
+			"ImportPath": "github.com/gorilla/schema",
+			"Rev": "f24e87d77af2aefbb5b8a84fa15c395040b76c4c"
+		},
+		{
+			"ImportPath": "github.com/gorilla/securecookie",
+			"Rev": "1b0c7f6e9ab3d7f500fd7d50c7ad835ff428139b"
+		},
+		{
+			"ImportPath": "github.com/gorilla/sessions",
+			"Rev": "c5bbe9d3d3c906d01de60189e5bfbba1d8164a80"
+		}
+	]
+}
