@@ -31,6 +31,9 @@
 				<div class="panel panel-primary">
 					<div class="panel-heading">Login</div>
 					<div class="panel-body">
+						{{if .login_form_error }}
+							<div class="alert alert-danger">{{ .login_form_error }}</div>
+						{{end}}
 						<form role="form" method="POST" action="/login">
 							<div class="form-group">
 								<label for="email">Email address</label>
@@ -49,6 +52,9 @@
 				<div class="panel panel-primary">
 					<div class="panel-heading">Signup</div>
 					<div class="panel-body">
+						{{if .signup_form_error }}
+							<div class="alert alert-danger">{{ .signup_form_error }}</div>
+						{{end}}
 						<form role="form" method="POST" action="/signup">
 							<div class="form-group">
 								<label for="email">Email address</label>
