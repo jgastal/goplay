@@ -98,7 +98,12 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 	u.Password = ""
 	session, _ := sstore.Get(r, "session")
 	session.Values["user"] = u
-	session.Save(r, w)
+	err = session.Save(r, w)
+	if err != nil {
+		log.Println("Session error: ", err)
+		internal_error(w, r)
+		return
+	}
 
 	http.Redirect(w, r, "/profile", 302)
 }
@@ -139,7 +144,12 @@ func signup_post(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := sstore.Get(r, "session")
 	session.Values["user"] = u
-	session.Save(r, w)
+	err = session.Save(r, w)
+	if err != nil {
+		log.Println("Session error: ", err)
+		http.Redirect(w, r, "/login", 302)
+		return
+	}
 
 	http.Redirect(w, r, "/profile", 302)
 }
