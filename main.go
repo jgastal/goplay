@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/sessions"
 	"html/template"
 	"labix.org/v2/mgo"
+	"log"
 	"net/http"
 	"os"
 )
@@ -42,6 +43,7 @@ func internal_error(w http.ResponseWriter, r *http.Request) {
 func templateResponse(w http.ResponseWriter, r *http.Request, name string, data interface{}) {
 	t, err := template.ParseFiles(name)
 	if err != nil {
+		log.Println("Template error: ", err)
 		internal_error(w, r)
 		return
 	}
@@ -69,6 +71,7 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 	query := col.Find(map[string]string{"email": cred.Email})
 	found, err := query.Count()
 	if err != nil {
+		log.Println("Mongodb error: ", err)
 		internal_error(w, r)
 		return
 	}
@@ -81,6 +84,7 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 	u := new(user)
 	err = query.One(&u)
 	if err != nil {
+		log.Println("Mongodb error: ", err)
 		internal_error(w, r)
 		return
 	}
@@ -126,6 +130,7 @@ func signup_post(w http.ResponseWriter, r *http.Request) {
 	pwd, err := bcrypt.GenerateFromPassword([]byte(cred.Password), bcrypt.DefaultCost)
 	u.Password = string(pwd)
 	if err != nil {
+		log.Println("bcrypt error: ", err)
 		internal_error(w, r)
 		return
 	}
