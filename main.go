@@ -51,13 +51,23 @@ func templateResponse(w http.ResponseWriter, r *http.Request, name string, data 
 }
 
 func login_get(w http.ResponseWriter, r *http.Request) {
-	// FIXME redirect if already logged in
+	session, _ := sstore.Get(r, "session")
+	_, exists := session.Values["user"]
+	if exists {
+		http.Redirect(w, r, "/profile", 302)
+		return
+	}
 
 	templateResponse(w, r, "template/login.html", nil)
 }
 
 func login_post(w http.ResponseWriter, r *http.Request) {
-	// FIXME redirect if already logged in
+	session, _ := sstore.Get(r, "session")
+	_, exists := session.Values["user"]
+	if exists {
+		http.Redirect(w, r, "/profile", 302)
+		return
+	}
 
 	cred := new(login)
 	err := decoder.Decode(cred, r.PostForm)
@@ -96,7 +106,6 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 
 	// Putting the password on a cookie just opens up an attack vector, even if the password is hashed and the cookie encrypted
 	u.Password = ""
-	session, _ := sstore.Get(r, "session")
 	session.Values["user"] = u
 	err = session.Save(r, w)
 	if err != nil {
@@ -109,7 +118,12 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 }
 
 func signup_post(w http.ResponseWriter, r *http.Request) {
-	// FIXME redirect if already logged in
+	session, _ := sstore.Get(r, "session")
+	_, exists := session.Values["user"]
+	if exists {
+		http.Redirect(w, r, "/profile", 302)
+		return
+	}
 
 	cred := new(signup)
 	err := decoder.Decode(cred, r.PostForm)
@@ -142,7 +156,6 @@ func signup_post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, _ := sstore.Get(r, "session")
 	session.Values["user"] = u
 	err = session.Save(r, w)
 	if err != nil {
