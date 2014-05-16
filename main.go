@@ -96,12 +96,7 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 
 	// Putting the password on a cookie just opens up an attack vector, even if the password is hashed and the cookie encrypted
 	u.Password = ""
-	session, err := sstore.Get(r, "session")
-	if err != nil {
-		log.Println("Session error: ", err)
-		internal_error(w, r)
-		return
-	}
+	session, _ := sstore.Get(r, "session")
 	session.Values["user"] = u
 	session.Save(r, w)
 
@@ -142,12 +137,7 @@ func signup_post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := sstore.Get(r, "session")
-	if err != nil {
-		log.Println("Session error: ", err)
-		http.Redirect(w, r, "/login", 302)
-		return
-	}
+	session, _ := sstore.Get(r, "session")
 	session.Values["user"] = u
 	session.Save(r, w)
 
