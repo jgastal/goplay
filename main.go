@@ -16,10 +16,7 @@ import (
 	"os"
 )
 
-var sstore = sessions.NewCookieStore(
-	[]byte("tDqZYv^\"?Qn2r|GgP!':rjY.naX!zLZBHSw8:2(pm`8G#?:utS!fBxd,9S-^\"D=D"),
-	[]byte("_cB2t~ss,V/XIl^41ppWRYB6=PrJ\\\\U2"),
-)
+var sstore sessions.Store
 
 var decoder = schema.NewDecoder()
 
@@ -174,6 +171,13 @@ func profile(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	crypto_key := os.Getenv("COOKIESTORE_CRYPTO_KEY")
+	if crypto_key == "" {
+		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")))
+	} else {
+		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")), []byte(crypto_key))
+	}
+
 	router := mux.NewRouter()
 
 	router.Methods("GET").Path("/login").HandlerFunc(login_get)
