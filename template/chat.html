@@ -129,7 +129,7 @@
 			function start() {
 				//FIXME put loading modal over everything
 
-				socket = new WebSocket('wss://goplay.herokuapp.com/chat');
+				socket = new WebSocket('{{ .chat_endpoint }}');
 				socket.onopen = connected;
 				socket.onclose = lost_connection;
 				socket.onmessage = msg_handler;

@@ -166,7 +166,11 @@ func signup_post(w http.ResponseWriter, r *http.Request) {
 func profile(w http.ResponseWriter, r *http.Request) {
 	u := context.Get(r, "username")
 
-	templateResponse(w, r, "template/chat.html", map[string]interface{}{"username": u})
+	ctx := map[string]interface{}{
+		"username":      u,
+		"chat_endpoint": "wss://goplay.herokuapp.com/chat",
+	}
+	templateResponse(w, r, "template/chat.html", ctx)
 }
 
 func main() {
