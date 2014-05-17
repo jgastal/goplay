@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
+	"github.com/jgastal/goplay/handlers"
 	"html/template"
 	"labix.org/v2/mgo"
 	"log"
@@ -36,15 +37,11 @@ type signup struct {
 	Password_repeat string
 }
 
-func internal_error(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "static/html/internal-error.html")
-}
-
 func templateResponse(w http.ResponseWriter, r *http.Request, name string, data interface{}) {
 	t, err := template.ParseFiles(name)
 	if err != nil {
 		log.Println("Template error: ", err)
-		internal_error(w, r)
+		handlers.InternalErrorHandler(w, r)
 		return
 	}
 	t.Execute(w, data)
@@ -82,7 +79,7 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 	found, err := query.Count()
 	if err != nil {
 		log.Println("Mongodb error: ", err)
-		internal_error(w, r)
+		handlers.InternalErrorHandler(w, r)
 		return
 	}
 	if found <= 0 {
@@ -95,7 +92,7 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 	err = query.One(&u)
 	if err != nil {
 		log.Println("Mongodb error: ", err)
-		internal_error(w, r)
+		handlers.InternalErrorHandler(w, r)
 		return
 	}
 	if bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(cred.Password)) != nil {
@@ -110,7 +107,7 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 	err = session.Save(r, w)
 	if err != nil {
 		log.Println("Session error: ", err)
-		internal_error(w, r)
+		handlers.InternalErrorHandler(w, r)
 		return
 	}
 
@@ -145,14 +142,14 @@ func signup_post(w http.ResponseWriter, r *http.Request) {
 	u.Password = string(pwd)
 	if err != nil {
 		log.Println("bcrypt error: ", err)
-		internal_error(w, r)
+		handlers.InternalErrorHandler(w, r)
 		return
 	}
 	col := db.C("users")
 	err = col.Insert(u)
 	if err != nil {
 		log.Println("Mongodb error: ", err)
-		internal_error(w, r)
+		handlers.InternalErrorHandler(w, r)
 		return
 	}
 
@@ -179,8 +176,8 @@ func main() {
 
 	//Form handlers
 	form_router := router.Methods("POST").Subrouter()
-	form_router.Handle("/login", formHandler{login_post})
-	form_router.Handle("/signup", formHandler{signup_post})
+	form_router.Handle("/login", handlers.FormHandler{login_post})
+	form_router.Handle("/signup", handlers.FormHandler{signup_post})
 
 	gob.Register(&user{})
 
