@@ -49,7 +49,7 @@ func templateResponse(w http.ResponseWriter, r *http.Request, name string, data 
 
 func login_get(w http.ResponseWriter, r *http.Request) {
 	session, _ := sstore.Get(r, "session")
-	_, exists := session.Values["user"]
+	_, exists := session.Values["username"]
 	if exists {
 		http.Redirect(w, r, "/profile", 302)
 		return
@@ -60,7 +60,7 @@ func login_get(w http.ResponseWriter, r *http.Request) {
 
 func login_post(w http.ResponseWriter, r *http.Request) {
 	session, _ := sstore.Get(r, "session")
-	_, exists := session.Values["user"]
+	_, exists := session.Values["username"]
 	if exists {
 		http.Redirect(w, r, "/profile", 302)
 		return
@@ -101,9 +101,7 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Putting the password on a cookie just opens up an attack vector, even if the password is hashed and the cookie encrypted
-	u.Password = ""
-	session.Values["user"] = u
+	session.Values["username"] = u.Email
 	err = session.Save(r, w)
 	if err != nil {
 		log.Println("Session error: ", err)
@@ -116,7 +114,7 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 
 func signup_post(w http.ResponseWriter, r *http.Request) {
 	session, _ := sstore.Get(r, "session")
-	_, exists := session.Values["user"]
+	_, exists := session.Values["username"]
 	if exists {
 		http.Redirect(w, r, "/profile", 302)
 		return
@@ -153,7 +151,7 @@ func signup_post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session.Values["user"] = u
+	session.Values["username"] = u.Email
 	err = session.Save(r, w)
 	if err != nil {
 		log.Println("Session error: ", err)

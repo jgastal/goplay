@@ -17,12 +17,12 @@ type RedirectAnonymousHandler struct {
 
 func (h RedirectAnonymousHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	session, _ := sstore.Get(r, "session")
-	u, exists := session.Values["user"]
+	u, exists := session.Values["username"]
 	if !exists {
 		http.Redirect(w, r, "/login", 302)
 		return
 	}
-	context.Set(r, "user", u)
+	context.Set(r, "username", u)
 
 	h.Handler(w, r)
 }
@@ -46,12 +46,12 @@ type ForbidAnonymousHandler struct {
 
 func (h ForbidAnonymousHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	session, _ := sstore.Get(r, "session")
-	u, exists := session.Values["user"]
+	u, exists := session.Values["username"]
 	if !exists {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	context.Set(r, "user", u)
+	context.Set(r, "username", u)
 
 	h.Handler(w, r)
 }
