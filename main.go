@@ -3,10 +3,11 @@ package main
 import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"encoding/gob"
-	"fmt"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
+	"github.com/jgastal/goplay/chat"
 	"github.com/jgastal/goplay/handlers"
 	"html/template"
 	"labix.org/v2/mgo"
@@ -163,19 +164,25 @@ func signup_post(w http.ResponseWriter, r *http.Request) {
 }
 
 func profile(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "PLACEHOLDER")
+	u := context.Get(r, "username")
+
+	templateResponse(w, r, "template/chat.html", map[string]interface{}{"username": u})
 }
 
 func main() {
 	router := mux.NewRouter()
 
 	router.Methods("GET").Path("/login").HandlerFunc(login_get)
-	router.Methods("GET").Path("/profile").HandlerFunc(profile)
+	router.Methods("GET").Path("/profile").Handler(handlers.RedirectAnonymousHandler{profile})
 
 	//Form handlers
 	form_router := router.Methods("POST").Subrouter()
 	form_router.Handle("/login", handlers.FormHandler{login_post})
 	form_router.Handle("/signup", handlers.FormHandler{signup_post})
+
+	cs := chat.NewServer("Lobby")
+	//Chat websocket handler
+	router.Path("/chat").Handler(handlers.ForbidAnonymousHandler{cs.GetHandler()})
 
 	gob.Register(&user{})
 

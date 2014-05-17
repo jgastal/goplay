@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>Chat</title>
+
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+
+		<style>
+			html {
+				height: 100%;
+			}
+			body {
+				height: 100%;
+				background-color: #333;
+			}
+			div.h90 {
+				height: 90%;
+			}
+			div.w90 {
+				width: 90%;
+			}
+			.full-width {
+				width: 100%;
+			}
+			.full-height {
+				height: 100%;
+			}
+			.top-margin {
+				margin-top: 10px;
+			}
+			#nicks {
+				overflow: hidden;
+			}
+		</style>
+	</head>
+
+	<body class="container">
+		<div class="row h90 top-margin">
+			<div class="col-md-10 full-height">
+				<div class="well well-sm full-height" id="backlog"></div>
+			</div>
+			<div class="col-md-2 full-height">
+				<div class="well well-sm full-height" id="nicks"></div>
+			</div>
+		</div>
+		<div class="row full-length top-margin">
+			<div class="form-group col-md-10">
+				<input type="text" class="form-control" id="msg-input" />
+			</div>
+			<div class="col-md-2">
+				<button type="button" class="btn btn-default full-width" onclick="send_message();">Send</button>
+			</div>
+		</div>
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<script>
+			var socket;
+
+			function msg_handler(msg) {
+				try {
+					obj = JSON.parse(msg.data);
+				} catch(e) {
+					console.log("Ignoring non JSON message: " + msg.data);
+					return;
+				}
+
+				if (!obj.hasOwnProperty('method') || !obj.hasOwnProperty('params')) {
+					console.log("Ignoring bad message: " + msg.data);
+					return;
+				}
+
+				if (obj.method === 'Nicks') {
+					update_nicks(obj.params);
+				} else if (obj.method === 'Joined') {
+					add_nick(obj.params);
+				} else if (obj.method === 'Left') {
+					del_nick(obj.params);
+				} else if (obj.method === 'NewMessage') {
+					new_message(obj.params);
+				}
+			}
+
+			function add_nick(nick) {
+				$('#nicks').append('<p name="' + nick + '">' + nick + '</p>');
+			}
+
+			function del_nick(nick) {
+				$('p[name=' + nick + ']').remove();
+			}
+
+			function new_message(msg) {
+				$('#backlog').append('<p>' + msg[0] + ' - ' + msg[1] + '</p>');
+			}
+
+			function send_message() {
+				var input = $('#msg-input');
+				socket.send(JSON.stringify({method: "Say", params: input.val()}));
+				input.val('');
+			}
+
+			function update_nicks(result) {
+				$('#nicks').empty();
+				for (var i = 0; i < result.length; i++) {
+					$('#nicks').append('<p id="' + result[i] + '">' + result[i] + '</p>');
+				}
+			}
+
+			function connected() {
+				socket.send(JSON.stringify({method: "GetNicks"}));
+				//FIXME clear loading modal
+				$('#backlog').append('<p>System - Connected</p>');
+				$('#backlog').append('<p>System - Welcome {{ .u }}</p>');
+			}
+
+			function lost_connection() {
+				//FIXME put loading modal over everything
+
+				setTimeout(1500, start);
+			}
+
+			function start() {
+				//FIXME put loading modal over everything
+
+				socket = new WebSocket('wss://goplay.herokuapp.com/chat');
+				socket.onopen = connected;
+				socket.onclose = lost_connection;
+				socket.onmessage = msg_handler;
+			}
+
+			$().ready(function() {
+				start();
+			});
+		</script>
+	</body>
+</html>
