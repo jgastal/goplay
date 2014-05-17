@@ -163,9 +163,16 @@ func signup_post(w http.ResponseWriter, r *http.Request) {
 func profile(w http.ResponseWriter, r *http.Request) {
 	u := context.Get(r, "username")
 
+	var endpoint string
+	if proto, ok := r.Header["X-Forwarded-Proto"]; ok && proto[0] == "https" {
+		endpoint = "wss://"
+	} else {
+		endpoint = "ws://"
+	}
+	endpoint += r.Host + "/chat"
 	ctx := map[string]interface{}{
 		"username":      u,
-		"chat_endpoint": "wss://goplay.herokuapp.com/chat",
+		"chat_endpoint": endpoint,
 	}
 	templateResponse(w, r, "template/chat.html", ctx)
 }
