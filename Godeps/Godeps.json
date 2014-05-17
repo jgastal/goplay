@@ -33,6 +33,10 @@
 			"Rev": "c5bbe9d3d3c906d01de60189e5bfbba1d8164a80"
 		},
 		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Rev": "10a95d14a3a215f5e2045d3dbbcd29f1ab209586"
+		},
+		{
 			"ImportPath": "labix.org/v2/mgo",
 			"Comment": "275",
 			"Rev": "gustavo@niemeyer.net-20140501184651-975yyw9ipld92pji"
