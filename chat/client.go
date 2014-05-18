@@ -8,24 +8,26 @@ import (
 type Client struct {
 	ws       *websocket.Conn
 	Username string
-	server   *Server
+	servers  map[string]*Server
 	writeCh  chan *message
 	stopCh   chan bool
 }
 
 type message struct {
+	Server string `json:"server"`
 	Method string `json:"method"`
 	Params interface{} `json:"params"`
 }
 
-func newClient(c *websocket.Conn, uname string, s *Server) *Client {
-	return &Client{
+func NewClient(c *websocket.Conn, uname string) {
+	client := &Client{
 		c,
 		uname,
-		s,
+		make(map[string]*Server),
 		make(chan *message),
 		make(chan bool),
 	}
+	client.Listen()
 }
 
 func (c *Client) Listen() {
@@ -40,13 +42,25 @@ func (c *Client) Listen() {
 			continue
 		}
 
-		if msg.Method == "GetNicks" {
-			c.replyNicks()
-		} else if msg.Method == "Say" {
-			c.say(msg.Params.(string))
+		s, ok := c.servers[msg.Server]
+		if ok {
+			if msg.Method == "GetNicks" {
+				c.writeCh <- &message{s.name, "Nicks", s.GetNicks()}
+			} else if msg.Method == "Say" {
+				s.Broadcast(c.Username, msg.Params.(string))
+			} else if msg.Method == "Leave" {
+				delete(c.servers, s.name)
+				s.delClient(c)
+			}
+		} else if msg.Method == "Join" {
+			s, ok = servers[msg.Server]
+			if ok {
+				c.servers[s.name] = s
+				s.addClient(c)
+			}
 		}
 	}
-	c.server.Del(c)
+	c.ws.Close()
 }
 
 func (c *Client) write() {
@@ -64,22 +78,14 @@ func (c *Client) write() {
 	}
 }
 
-func (c *Client) replyNicks() {
-	c.writeCh <- &message{"Nicks", c.server.GetNicks()}
+func (c *Client) NewMessage(server, who, what string) {
+	c.writeCh <- &message{server, "NewMessage", []string{who, what}}
 }
 
-func (c *Client) say(msg string) {
-	c.server.Broadcast(c.Username, msg)
+func (c *Client) Joined(server, who string) {
+	c.writeCh <- &message{server, "Joined", who}
 }
 
-func (c *Client) NewMessage(who string, what string) {
-	c.writeCh <- &message{"NewMessage", []string{who, what}}
-}
-
-func (c *Client) Joined(who string) {
-	c.writeCh <- &message{"Joined", who}
-}
-
-func (c *Client) Left(who string) {
-	c.writeCh <- &message{"Left", who}
+func (c *Client) Left(server, who string) {
+	c.writeCh <- &message{server, "Left", who}
 }

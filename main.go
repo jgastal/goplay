@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
+	"github.com/gorilla/websocket"
 	"github.com/jgastal/goplay/chat"
 	"github.com/jgastal/goplay/handlers"
 	"html/template"
@@ -21,6 +22,8 @@ var sstore sessions.Store
 var decoder = schema.NewDecoder()
 
 var db *mgo.Database
+
+var upgrader = websocket.Upgrader{}
 
 type user struct {
 	Email    string
@@ -160,6 +163,17 @@ func signupPost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/profile", 302)
 }
 
+func chatHandler(w http.ResponseWriter, r *http.Request) {
+	u := context.Get(r, "username").(string)
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		handlers.InternalErrorHandler(w, r)
+		return
+	}
+
+	chat.NewClient(ws, u)
+}
+
 func profile(w http.ResponseWriter, r *http.Request) {
 	u := context.Get(r, "username")
 
@@ -195,9 +209,9 @@ func main() {
 	form_router.Handle("/login", handlers.FormHandler{loginPost})
 	form_router.Handle("/signup", handlers.FormHandler{signupPost})
 
-	cs := chat.NewServer("Lobby")
+	chat.NewServer("Lobby")
 	//Chat websocket handler
-	router.Path("/chat").Handler(handlers.ForbidAnonymousHandler{cs.GetHandler()})
+	router.Path("/chat").Handler(handlers.ForbidAnonymousHandler{chatHandler})
 
 	gob.Register(&user{})
 

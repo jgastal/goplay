@@ -72,6 +72,7 @@
 					return;
 				}
 
+				// Since we're connected to only one server ignore server property
 				if (!obj.hasOwnProperty('method') || !obj.hasOwnProperty('params')) {
 					console.log("Ignoring bad message: " + msg.data);
 					return;
@@ -102,7 +103,7 @@
 
 			function send_message() {
 				var input = $('#msg-input');
-				socket.send(JSON.stringify({method: "Say", params: input.val()}));
+				socket.send(JSON.stringify({server: "Lobby", method: "Say", params: input.val()}));
 				input.val('');
 			}
 
@@ -114,7 +115,8 @@
 			}
 
 			function connected() {
-				socket.send(JSON.stringify({method: "GetNicks"}));
+				socket.send(JSON.stringify({server: "Lobby", method: "Join"}));
+				socket.send(JSON.stringify({server: "Lobby", method: "GetNicks"}));
 				//FIXME clear loading modal
 				$('#backlog').append('<p>System - Connected</p>');
 				$('#backlog').append('<p>System - Welcome {{ .u }}</p>');
