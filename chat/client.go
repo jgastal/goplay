@@ -52,14 +52,14 @@ func (c *Client) Listen() {
 func (c *Client) write() {
 	for {
 		select {
-			case <- c.stopCh:
-				return
-			case msg := <- c.writeCh:
-				err := c.ws.WriteJSON(msg)
-				if err == io.EOF {
-					//Read will get it's own EOF soon enough
-					break
-				}
+		case <-c.stopCh:
+			return
+		case msg := <-c.writeCh:
+			err := c.ws.WriteJSON(msg)
+			if err == io.EOF {
+				//Read will get it's own EOF soon enough
+				break
+			}
 		}
 	}
 }

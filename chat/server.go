@@ -26,7 +26,7 @@ func NewServer(name string) *Server {
 	s.name = name
 
 	go s.run()
-	return &s 
+	return &s
 }
 
 func (s *Server) GetHandler() func(http.ResponseWriter, *http.Request) {
@@ -50,19 +50,19 @@ func (s *Server) GetHandler() func(http.ResponseWriter, *http.Request) {
 func (s *Server) run() {
 	for {
 		select {
-			case c := <- s.addCh:
-				log.Println(c.Username, "connected")
-				for _, v := range s.clients {
-					v.Joined(c.Username)
-				}
-				s.clients[c.Username] = c
+		case c := <-s.addCh:
+			log.Println(c.Username, "connected")
+			for _, v := range s.clients {
+				v.Joined(c.Username)
+			}
+			s.clients[c.Username] = c
 
-			case c := <- s.delCh:
-				log.Println(c.Username, "disconnected")
-				delete(s.clients, c.Username)
-				for _, v := range s.clients {
-					v.Left(c.Username)
-				}
+		case c := <-s.delCh:
+			log.Println(c.Username, "disconnected")
+			delete(s.clients, c.Username)
+			for _, v := range s.clients {
+				v.Left(c.Username)
+			}
 		}
 	}
 }

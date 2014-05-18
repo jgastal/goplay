@@ -63,6 +63,6 @@ func init() {
 	if crypto_key == "" {
 		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")))
 	} else {
-		sstore= sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")), []byte(crypto_key))
+		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")), []byte(crypto_key))
 	}
 }

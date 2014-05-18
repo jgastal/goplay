@@ -45,7 +45,7 @@ func templateResponse(w http.ResponseWriter, r *http.Request, name string, data 
 	t.Execute(w, data)
 }
 
-func login_get(w http.ResponseWriter, r *http.Request) {
+func loginGet(w http.ResponseWriter, r *http.Request) {
 	session, _ := sstore.Get(r, "session")
 	_, exists := session.Values["username"]
 	if exists {
@@ -56,7 +56,7 @@ func login_get(w http.ResponseWriter, r *http.Request) {
 	templateResponse(w, r, "template/login.html", nil)
 }
 
-func login_post(w http.ResponseWriter, r *http.Request) {
+func loginPost(w http.ResponseWriter, r *http.Request) {
 	session, _ := sstore.Get(r, "session")
 	_, exists := session.Values["username"]
 	if exists {
@@ -110,7 +110,7 @@ func login_post(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/profile", 302)
 }
 
-func signup_post(w http.ResponseWriter, r *http.Request) {
+func signupPost(w http.ResponseWriter, r *http.Request) {
 	session, _ := sstore.Get(r, "session")
 	_, exists := session.Values["username"]
 	if exists {
@@ -187,13 +187,13 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.Methods("GET").Path("/login").HandlerFunc(login_get)
+	router.Methods("GET").Path("/login").HandlerFunc(loginGet)
 	router.Methods("GET").Path("/profile").Handler(handlers.RedirectAnonymousHandler{profile})
 
 	//Form handlers
 	form_router := router.Methods("POST").Subrouter()
-	form_router.Handle("/login", handlers.FormHandler{login_post})
-	form_router.Handle("/signup", handlers.FormHandler{signup_post})
+	form_router.Handle("/login", handlers.FormHandler{loginPost})
+	form_router.Handle("/signup", handlers.FormHandler{signupPost})
 
 	cs := chat.NewServer("Lobby")
 	//Chat websocket handler
