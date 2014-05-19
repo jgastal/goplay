@@ -191,6 +191,16 @@ func profile(w http.ResponseWriter, r *http.Request) {
 	templateResponse(w, r, "template/chat.html", ctx)
 }
 
+func setupDb() {
+	s, err := mgo.Dial(os.Getenv("MONGOHQ_URL"))
+	if err != nil {
+		panic(err)
+	}
+	db = s.DB("")
+
+	db.C("users").EnsureIndex(mgo.Index{Key: []string{"email"}, Unique: true})
+}
+
 func main() {
 	crypto_key := os.Getenv("COOKIESTORE_CRYPTO_KEY")
 	if crypto_key == "" {
@@ -215,20 +225,14 @@ func main() {
 
 	gob.Register(&user{})
 
-	s, err := mgo.Dial(os.Getenv("MONGOHQ_URL"))
-	if err != nil {
-		panic(err)
-	}
-	db = s.DB("")
-
-	db.C("users").EnsureIndex(mgo.Index{Key: []string{"email"}, Unique: true})
+	setupDb()
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8000"
 	}
 
-	err = http.ListenAndServe(":"+port, router)
+	err := http.ListenAndServe(":"+port, router)
 	if err != nil {
 		panic(err)
 	}
