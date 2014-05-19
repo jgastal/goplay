@@ -201,15 +201,8 @@ func setupDb() {
 	db.C("users").EnsureIndex(mgo.Index{Key: []string{"email"}, Unique: true})
 }
 
-func main() {
-	crypto_key := os.Getenv("COOKIESTORE_CRYPTO_KEY")
-	if crypto_key == "" {
-		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")))
-	} else {
-		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")), []byte(crypto_key))
-	}
-
-	router := mux.NewRouter()
+func setupHandlers() (router *mux.Router) {
+	router = mux.NewRouter()
 
 	router.Methods("GET").Path("/login").HandlerFunc(loginGet)
 	router.Methods("GET").Path("/profile").Handler(handlers.RedirectAnonymousHandler{profile})
@@ -222,6 +215,16 @@ func main() {
 	chat.NewServer("Lobby")
 	//Chat websocket handler
 	router.Path("/chat").Handler(handlers.ForbidAnonymousHandler{chatHandler})
+	return
+}
+
+func main() {
+	crypto_key := os.Getenv("COOKIESTORE_CRYPTO_KEY")
+	if crypto_key == "" {
+		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")))
+	} else {
+		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")), []byte(crypto_key))
+	}
 
 	gob.Register(&user{})
 
@@ -232,7 +235,7 @@ func main() {
 		port = "8000"
 	}
 
-	err := http.ListenAndServe(":"+port, router)
+	err := http.ListenAndServe(":"+port, setupHandlers())
 	if err != nil {
 		panic(err)
 	}
