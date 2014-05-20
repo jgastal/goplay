@@ -1,12 +1,17 @@
 package chat
 
 import (
-	"github.com/gorilla/websocket"
 	"io"
 )
 
+type JSONReadWriteCloser interface {
+	io.Closer
+	ReadJSON(interface{}) error
+	WriteJSON(interface{}) error
+}
+
 type Client struct {
-	ws       *websocket.Conn
+	ws       JSONReadWriteCloser
 	Username string
 	servers  map[string]*Server
 	writeCh  chan *message
@@ -19,7 +24,7 @@ type message struct {
 	Params interface{} `json:"params"`
 }
 
-func NewClient(c *websocket.Conn, uname string) {
+func NewClient(c JSONReadWriteCloser, uname string) {
 	client := &Client{
 		c,
 		uname,
