@@ -25,6 +25,7 @@ func NewServer(name string) {
 }
 
 func (s *Server) run() {
+listen:
 	for {
 		select {
 		case c := <-s.addCh:
@@ -41,7 +42,7 @@ func (s *Server) run() {
 				v.Left(s.name, c.Username)
 			}
 			if len(s.clients) == 0 {
-				break
+				break listen
 			}
 		}
 	}
