@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/gorilla/websocket"
 	"github.com/jgastal/goplay/chat"
-	"github.com/jgastal/goplay/handlers"
 	"html/template"
 	"labix.org/v2/mgo"
 	"log"
@@ -42,7 +41,7 @@ func templateResponse(w http.ResponseWriter, r *http.Request, name string, data 
 	t, err := template.ParseFiles(name)
 	if err != nil {
 		log.Println("Template error: ", err)
-		handlers.InternalErrorHandler(w, r)
+		InternalErrorHandler(w, r)
 		return
 	}
 	t.Execute(w, data)
@@ -80,7 +79,7 @@ func loginPost(w http.ResponseWriter, r *http.Request) {
 	found, err := query.Count()
 	if err != nil {
 		log.Println("Mongodb error: ", err)
-		handlers.InternalErrorHandler(w, r)
+		InternalErrorHandler(w, r)
 		return
 	}
 	if found <= 0 {
@@ -93,7 +92,7 @@ func loginPost(w http.ResponseWriter, r *http.Request) {
 	err = query.One(&u)
 	if err != nil {
 		log.Println("Mongodb error: ", err)
-		handlers.InternalErrorHandler(w, r)
+		InternalErrorHandler(w, r)
 		return
 	}
 	if bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(cred.Password)) != nil {
@@ -106,7 +105,7 @@ func loginPost(w http.ResponseWriter, r *http.Request) {
 	err = session.Save(r, w)
 	if err != nil {
 		log.Println("Session error: ", err)
-		handlers.InternalErrorHandler(w, r)
+		InternalErrorHandler(w, r)
 		return
 	}
 
@@ -141,14 +140,14 @@ func signupPost(w http.ResponseWriter, r *http.Request) {
 	u.Password = string(pwd)
 	if err != nil {
 		log.Println("bcrypt error: ", err)
-		handlers.InternalErrorHandler(w, r)
+		InternalErrorHandler(w, r)
 		return
 	}
 	col := db.C("users")
 	err = col.Insert(u)
 	if err != nil {
 		log.Println("Mongodb error: ", err)
-		handlers.InternalErrorHandler(w, r)
+		InternalErrorHandler(w, r)
 		return
 	}
 
@@ -167,7 +166,7 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 	u := context.Get(r, "username").(string)
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		handlers.InternalErrorHandler(w, r)
+		InternalErrorHandler(w, r)
 		return
 	}
 
@@ -205,16 +204,16 @@ func setupHandlers() (router *mux.Router) {
 	router = mux.NewRouter()
 
 	router.Methods("GET").Path("/login").HandlerFunc(loginGet)
-	router.Methods("GET").Path("/profile").Handler(handlers.RedirectAnonymousHandler{profile})
+	router.Methods("GET").Path("/profile").Handler(RedirectAnonymousHandler{profile})
 
 	//Form handlers
 	form_router := router.Methods("POST").Subrouter()
-	form_router.Handle("/login", handlers.FormHandler{loginPost})
-	form_router.Handle("/signup", handlers.FormHandler{signupPost})
+	form_router.Handle("/login", FormHandler{loginPost})
+	form_router.Handle("/signup", FormHandler{signupPost})
 
 	chat.NewServer("Lobby")
 	//Chat websocket handler
-	router.Path("/chat").Handler(handlers.ForbidAnonymousHandler{chatHandler})
+	router.Path("/chat").Handler(ForbidAnonymousHandler{chatHandler})
 	return
 }
 

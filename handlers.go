@@ -1,13 +1,9 @@
-package handlers
+package main
 
 import (
-	"github.com/gorilla/context"
-	"github.com/gorilla/sessions"
 	"net/http"
-	"os"
+	"github.com/gorilla/context"
 )
-
-var sstore sessions.Store
 
 type RedirectAnonymousHandler struct {
 	Handler func(w http.ResponseWriter, r *http.Request)
@@ -56,13 +52,4 @@ func (h ForbidAnonymousHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 func InternalErrorHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "static/html/internal-error.html")
-}
-
-func init() {
-	crypto_key := os.Getenv("COOKIESTORE_CRYPTO_KEY")
-	if crypto_key == "" {
-		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")))
-	} else {
-		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")), []byte(crypto_key))
-	}
 }
