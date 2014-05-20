@@ -34,7 +34,7 @@ type login user
 type signup struct {
 	Email           string
 	Password        string
-	Password_repeat string
+	PasswordRepeat string
 }
 
 func templateResponse(w http.ResponseWriter, r *http.Request, name string, data interface{}) {
@@ -127,7 +127,7 @@ func signupPost(w http.ResponseWriter, r *http.Request) {
 		templateResponse(w, r, "template/login.html", formErr)
 		return
 	}
-	if cred.Password != cred.Password_repeat {
+	if cred.Password != cred.PasswordRepeat {
 		formErr := map[string]string{"signup_form_error": "Passwords don't match."}
 		templateResponse(w, r, "template/login.html", formErr)
 		return
@@ -207,9 +207,9 @@ func setupHandlers() (router *mux.Router) {
 	router.Methods("GET").Path("/profile").Handler(RedirectAnonymousHandler{profile})
 
 	//Form handlers
-	form_router := router.Methods("POST").Subrouter()
-	form_router.Handle("/login", FormHandler{loginPost})
-	form_router.Handle("/signup", FormHandler{signupPost})
+	formRouter := router.Methods("POST").Subrouter()
+	formRouter.Handle("/login", FormHandler{loginPost})
+	formRouter.Handle("/signup", FormHandler{signupPost})
 
 	chat.NewServer("Lobby")
 	//Chat websocket handler
@@ -218,11 +218,11 @@ func setupHandlers() (router *mux.Router) {
 }
 
 func main() {
-	crypto_key := os.Getenv("COOKIESTORE_CRYPTO_KEY")
-	if crypto_key == "" {
+	cryptoKey := os.Getenv("COOKIESTORE_CRYPTO_KEY")
+	if cryptoKey == "" {
 		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")))
 	} else {
-		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")), []byte(crypto_key))
+		sstore = sessions.NewCookieStore([]byte(os.Getenv("COOKIESTORE_AUTH_KEY")), []byte(cryptoKey))
 	}
 
 	gob.Register(&user{})
