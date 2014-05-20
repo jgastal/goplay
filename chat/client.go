@@ -49,13 +49,14 @@ func (c *Client) Listen() {
 
 		s, ok := c.servers[msg.Server]
 		if ok {
-			if msg.Method == "GetNicks" {
-				c.writeCh <- &message{s.name, "Nicks", s.GetNicks()}
-			} else if msg.Method == "Say" {
-				s.Broadcast(c.Username, msg.Params.(string))
-			} else if msg.Method == "Leave" {
-				delete(c.servers, s.name)
-				s.delClient(c)
+			switch msg.Method {
+				case "GetNicks":
+					c.writeCh <- &message{s.name, "Nicks", s.GetNicks()}
+				case "Say":
+					s.Broadcast(c.Username, msg.Params.(string))
+				case "Leave":
+					delete(c.servers, s.name)
+					s.delClient(c)
 			}
 		} else if msg.Method == "Join" {
 			s, ok = servers[msg.Server]
