@@ -140,6 +140,10 @@
 			$().ready(function() {
 				start();
 			});
+
+			$(window).on('beforeunload', function(){
+				socket.close();
+			});
 		</script>
 	</body>
 </html>
