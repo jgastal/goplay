@@ -67,6 +67,9 @@ func (c *Client) Listen() {
 		}
 	}
 	c.ws.Close()
+	for _, s := range c.servers {
+		s.delClient(c)
+	}
 }
 
 func (c *Client) write() {
