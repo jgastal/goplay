@@ -15,7 +15,7 @@ type Client struct {
 	Username string
 	servers  map[string]*Server
 	writeCh  chan *message
-	stopCh   chan bool
+	stopCh   chan struct{}
 }
 
 type message struct {
@@ -30,7 +30,7 @@ func NewClient(c JSONReadWriteCloser, uname string) {
 		uname,
 		make(map[string]*Server),
 		make(chan *message),
-		make(chan bool),
+		make(chan struct{}),
 	}
 	client.Listen()
 }
@@ -41,7 +41,7 @@ func (c *Client) Listen() {
 		msg := new(message)
 		err := c.ws.ReadJSON(msg)
 		if err == io.EOF {
-			c.stopCh <- true
+			c.stopCh <- struct{}{}
 			break
 		} else if err != nil {
 			continue
