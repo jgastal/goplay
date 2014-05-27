@@ -29,8 +29,6 @@ type user struct {
 	Password string
 }
 
-type login user
-
 type signup struct {
 	Email           string
 	Password        string
@@ -66,7 +64,7 @@ func loginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cred := new(login)
+	cred := new(user)
 	err := decoder.Decode(cred, r.PostForm)
 	if err != nil {
 		formErr := map[string]string{"login_form_error": "Extra parameters received. Please send only email and password."}
