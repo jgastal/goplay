@@ -34,7 +34,7 @@ type login user
 type signup struct {
 	Email           string
 	Password        string
-	PasswordRepeat string
+	PasswordRepeat  string
 }
 
 func templateResponse(w http.ResponseWriter, r *http.Request, name string, data interface{}) {
