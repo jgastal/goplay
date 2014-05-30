@@ -201,8 +201,9 @@ func setupDb() {
 func setupHandlers() (router *mux.Router) {
 	router = mux.NewRouter()
 
-	router.Methods("GET").Path("/login").HandlerFunc(loginGet)
-	router.Methods("GET").Path("/profile").Handler(RedirectAnonymousHandler{profile})
+	getRouter := router.Methods("GET").Subrouter()
+	getRouter.Path("/login").HandlerFunc(loginGet)
+	getRouter.Path("/profile").Handler(RedirectAnonymousHandler{profile})
 
 	//Form handlers
 	formRouter := router.Methods("POST").Subrouter()
