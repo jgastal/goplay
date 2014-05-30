@@ -32,10 +32,10 @@ func NewClient(c JSONReadWriteCloser, uname string) {
 		make(chan *message),
 		make(chan struct{}),
 	}
-	client.Listen()
+	client.listen()
 }
 
-func (c *Client) Listen() {
+func (c *Client) listen() {
 	go c.write()
 	for {
 		msg := new(message)
@@ -51,9 +51,9 @@ func (c *Client) Listen() {
 		if ok {
 			switch msg.Method {
 				case "GetNicks":
-					c.writeCh <- &message{s.name, "Nicks", s.GetNicks()}
+					c.writeCh <- &message{s.name, "Nicks", s.getNicks()}
 				case "Say":
-					s.Broadcast(c.Username, msg.Params.(string))
+					s.broadcast(c.Username, msg.Params.(string))
 				case "Leave":
 					delete(c.servers, s.name)
 					s.delClient(c)
@@ -87,14 +87,14 @@ func (c *Client) write() {
 	}
 }
 
-func (c *Client) NewMessage(server, who, what string) {
+func (c *Client) newMessage(server, who, what string) {
 	c.writeCh <- &message{server, "NewMessage", []string{who, what}}
 }
 
-func (c *Client) Joined(server, who string) {
+func (c *Client) joined(server, who string) {
 	c.writeCh <- &message{server, "Joined", who}
 }
 
-func (c *Client) Left(server, who string) {
+func (c *Client) left(server, who string) {
 	c.writeCh <- &message{server, "Left", who}
 }

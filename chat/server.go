@@ -31,7 +31,7 @@ listen:
 		case c := <-s.addCh:
 			log.Println(c.Username, "joined", s.name)
 			for _, v := range s.clients {
-				v.Joined(s.name, c.Username)
+				v.joined(s.name, c.Username)
 			}
 			s.clients[c.Username] = c
 
@@ -39,7 +39,7 @@ listen:
 			log.Println(c.Username, "left", s.name)
 			delete(s.clients, c.Username)
 			for _, v := range s.clients {
-				v.Left(s.name, c.Username)
+				v.left(s.name, c.Username)
 			}
 			if len(s.clients) == 0 {
 				break listen
@@ -57,7 +57,7 @@ func (s *Server) delClient(c *Client) {
 	s.delCh <- c
 }
 
-func (s *Server) GetNicks() []string {
+func (s *Server) getNicks() []string {
 	reply := make([]string, len(s.clients))
 	i := 0
 	for k := range s.clients {
@@ -67,8 +67,8 @@ func (s *Server) GetNicks() []string {
 	return reply
 }
 
-func (s *Server) Broadcast(who string, what string) {
+func (s *Server) broadcast(who string, what string) {
 	for _, v := range s.clients {
-		v.NewMessage(s.name, who, what)
+		v.newMessage(s.name, who, what)
 	}
 }
