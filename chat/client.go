@@ -81,7 +81,7 @@ func (c *Client) write() {
 			err := c.ws.WriteJSON(msg)
 			if err == io.EOF {
 				//Read will get it's own EOF soon enough
-				break
+				return
 			}
 		}
 	}
