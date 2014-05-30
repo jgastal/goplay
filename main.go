@@ -209,7 +209,6 @@ func setupHandlers() (router *mux.Router) {
 	formRouter.Handle("/login", FormHandler{loginPost})
 	formRouter.Handle("/signup", FormHandler{signupPost})
 
-	chat.NewServer("Lobby")
 	//Chat websocket handler
 	router.Path("/chat").Handler(ForbidAnonymousHandler{chatHandler})
 	return
@@ -226,6 +225,7 @@ func main() {
 	gob.Register(&user{})
 
 	setupDb()
+	chat.NewServer("Lobby")
 
 	port := os.Getenv("PORT")
 	if port == "" {
